@@ -9,6 +9,8 @@ import bcrypt from 'bcrypt';
 import { nanoid } from 'nanoid';
 //generate token to check user access is valid
 import jwt from 'jsonwebtoken';
+//accept request from other port
+import cors from 'cors';
 
 // schema below
 import User from './Schema/User.js';
@@ -20,6 +22,7 @@ let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for e
 let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
 server.use(express.json());
+server.use(cors());
 
 mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
