@@ -14,7 +14,7 @@ import cors from 'cors';
 //use firebase to auth access token
 import admin from 'firebase-admin';
 //firebase keys
-import serviceAccountKey from "./react-js-blogging-websit-d0817-firebase-adminsdk-nhgqt-d08c8ec4b7.json" with { type: "json" };
+import serviceAccountKey from "./private-blog-41137-firebase-adminsdk-zshr2-dfd3d47ed9.json" with { type: "json" };
 
 import { getAuth } from "firebase-admin/auth";
 
