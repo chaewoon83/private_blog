@@ -5,6 +5,10 @@ import googleIcon from "../imgs/google.png"
 import {Link} from "react-router-dom";
 
 const UserAuthForm = ( {type} ) => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+    }
     return(
         <AnimationWrapper keyValue={type}>
             <section className="h-cover flex items-center justify-center">
@@ -42,6 +46,7 @@ const UserAuthForm = ( {type} ) => {
                     <button
                         className="btn-dark flex mx-auto mt-14"
                         type="submit"
+                        onClick={handleSubmit}
                     >
                         {type.replace("-"," ")}
                     </button>
