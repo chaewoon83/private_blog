@@ -128,4 +128,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
 blogging website - frontend/src/common/firebase.jsx
+server/react-js-blogging-websit-d0817-firebase-adminsdk-nhgqt-d08c8ec4b7.json
+frontend/src/common/firebase.jsx

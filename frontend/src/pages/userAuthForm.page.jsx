@@ -9,6 +9,7 @@ import axios from "axios";
 import { storeInsesson } from "../common/session";
 //for Authentication
 import { UserContext } from "../App";
+import { authWithGoogle } from "../common/firebase";
 
 
 const UserAuthForm = ( {type} ) => {
@@ -79,8 +80,25 @@ const UserAuthForm = ( {type} ) => {
         }
 
         userAuthTroughServer(serverRoute, formData);
-
     }
+
+    const handleGoogleAuth = async (e) => {
+        e.preventDefault();
+
+        authWithGoogle().then(user => {
+            let serverRoute = "/google-auth";
+
+            let formData = {
+                access_token: user.accessToken
+            }
+            userAuthTroughServer(serverRoute, formData);
+        })
+        .catch(err => {
+            toast.error('trouble login through google');
+            return console.log(err);
+        })
+    }
+
     return(
         access_token ? 
         <Navigate to="/" />
@@ -134,8 +152,8 @@ const UserAuthForm = ( {type} ) => {
                         <hr className="w-1/2 border-black"/>
                     </div>
 
-                    <button className="btn-dark flex items-center justify-center 
-                                        gap-4 w-[90%] mx-auto">
+                    <button className="btn-dark flex items-center justify-center gap-4 w-[90%] mx-auto"
+                    onClick={handleGoogleAuth}>
                             <img src={googleIcon} 
                             className="w-5"/>
                             continue with google

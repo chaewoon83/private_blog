@@ -2,7 +2,7 @@ import {useContext, useState} from "react";
 import {Link, Outlet} from "react-router-dom";
 import logo from "../imgs/logo.png";
 import React from "react";
-import { UserContext } from "../App";
+import { UserContext } from "../App.jsx";
 import UserNavigationPanel from "./user-navigation.component.jsx";
 
 const Navbar = () => {
