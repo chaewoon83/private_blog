@@ -98,6 +98,7 @@ const UserAuthForm = ( {type} ) => {
             return console.log(err);
         })
     }
+    
 
     return(
         access_token ? 

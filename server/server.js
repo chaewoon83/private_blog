@@ -143,8 +143,8 @@ server.post("/signin", (req, res) => {
 })
 
 server.post("/google-auth", async (req, res) => {
-
     let {access_token} = req.body;
+    console.log(access_token);
     getAuth()
     .verifyIdToken(access_token)
     .then(async (decodedUser) => {
