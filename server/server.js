@@ -15,6 +15,8 @@ import cors from 'cors';
 import admin from 'firebase-admin';
 //firebase keys
 import serviceAccountKey from "./private-blog-41137-firebase-adminsdk-zshr2-dfd3d47ed9.json" with { type: "json" };
+//connect with aws
+import aws from "aws-sdk";
 
 import { getAuth } from "firebase-admin/auth";
 
@@ -38,6 +40,25 @@ mongoose.connect(process.env.DB_LOCATION, {
     autoIndex: true,
 });
 
+//setting up s3 bucket
+const s3 = new aws.S3({
+    region: 'ap-southeast-2',
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, 
+});
+
+const generateUploadURL = async () => {
+    const date = new Date();
+    const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+    return await s3.getSignedUrlPromise('putObject',{
+        Bucket: 'private-blog-protfolio',
+        Key: imageName,
+        Expires: 1000,
+        ContentType: "image/jpeg"
+    })
+}
+
 const formatDatatoSend = (user) => {
     const access_token = jwt.sign({id: user._id}, process.env.SECRET_ACCESS_KEY);
 
@@ -52,13 +73,23 @@ const formatDatatoSend = (user) => {
 const generateUsername = async (email) => {
     let username = email.split("@")[0];
 
-    let isUsernameExists = await User.exists({"personal_info.username": username}).then(
-        (result) => result)
+    let isUsernameExists = await User.exists({"personal_info.username": username}).then((result) => result)
 
     isUsernameExists ? username += nanoid().substring(0, 5) : "";
 
     return username;
 }
+
+server.get('/get-upload-url', (req, res) => {
+    
+    generateUploadURL()
+    .then(url => res.status(200).json({uploadURL: url}))
+    .catch(err=>
+    {
+        console.log(err.message);
+        return res.status(500).json({error: err.message});
+    })
+})
 
 server.post("/signup", (req, res) => {
     let { fullname, email, password } = req.body;
