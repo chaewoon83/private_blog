@@ -1,1 +1,14 @@
-GET http://localhost:3000/get-upload-url
+POST http://localhost:3000/create-blog
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2MwMDE3Nzc2MjcyZjQ0MTRlNTE4MyIsImlhdCI6MTczNjE3OTczNX0.GHk0zIX7eCm4m4RU7QbbTKTrCacctIk7m_VKIZMo2yY
+
+{
+    "title": "test title #  2 !2 #%$% asd",
+    "banner": "https://random.com/urls",
+    "des": "description",
+    "content": {
+        "blocks": [1, 2]
+    },
+    "tags": ["test title"," qweqwe"]
+
+}
