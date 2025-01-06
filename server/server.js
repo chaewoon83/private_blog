@@ -247,25 +247,27 @@ server.post("/create-blog", verifyJWT,(req, res) => {
 
     let { title, des, banner, tags, content, draft } = req.body;
 
-    //content validation
     if(!title.length){
         return res.status(403).json({"error": "You must provide a title to publish the blog"});
     }
 
-    if(!des.length || des.length > 200){
-        return res.status(403).json( {"error" : "You must provide blog description under 200 characters"});
-    }
+    if(!draft){
+        //content validation
+        if(!des.length || des.length > 200){
+            return res.status(403).json( {"error" : "You must provide blog description under 200 characters"});
+        }
 
-    if(!banner.length){
-        return res.status(403).json( { "error": "You must provide blog banner to publish it"});
-    }
+        if(!banner.length){
+            return res.status(403).json( { "error": "You must provide blog banner to publish it"});
+        }
 
-    if(!content.blocks.length){
-        return res.status(403).json( { "error": "You must provide some blog content to publish it"});
-    }
+        if(!content.blocks.length){
+            return res.status(403).json( { "error": "You must provide some blog content to publish it"});
+        }
 
-    if(!tags.length || tags.length > 10){
-        return res.status(403).json( { "error": "You must provide tags to publish it"});
+        if(!tags.length || tags.length > 10){
+            return res.status(403).json( { "error": "You must provide tags to publish it"});
+        }
     }
 
     //make tag names lowercase to catagorize the tags
