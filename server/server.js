@@ -101,13 +101,17 @@ const generateUsername = async (email) => {
     return username;
 }
 
-server.get('/latest-blogs', (req, res) => {
+server.post('/latest-blogs', (req, res) => {
+    
+    let { page } = req.body;
+
     let maxLimit = 5;
 
     Blog.find({ draft: false })
     .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
     .sort({"publishedAt": -1 })
     .select("blog_id title des banner activity tags publishedAt -_id")
+    .skip((page-1) * maxLimit)
     .limit(maxLimit)
     .then(blogs => res.status(200).json({blogs}))
     .catch(err=>
@@ -115,6 +119,20 @@ server.get('/latest-blogs', (req, res) => {
             console.log(err.message);
             return res.status(500).json({error: err.message});
         })
+})
+
+server.post("/all-latest-blogs-count", (req, res) => {
+
+    Blog.countDocuments({ draft: false })
+    .then(count=> 
+        res.status(200).json({ totalDocs: count })
+    )
+    .catch(err=>{
+        console.log(err.message);
+        return res.status(500).json({ "error": err.message});
+    }
+    )
+
 })
 
 server.get('/get-upload-url', (req, res) => {
@@ -245,7 +263,7 @@ server.post("/google-auth", async (req, res) => {
                 user = u;
             })
             .catch(err => {
-                return res.status(500).json({"error": err.message})
+                return res.status(500).json({"error": err.message});
             })
             }
             return res.status(200).json(formatDatatoSend(user));
@@ -255,6 +273,44 @@ server.post("/google-auth", async (req, res) => {
         return res.status(500).json({"error": "Failed to authenticate you with google. Try with some other google account"})
     }
     )
+})
+
+server.post("/all-search-blogs-count", (req, res) => {
+    let { tag } = req.body;
+
+    let findQuery = { tags: tag, draft: false };
+
+    Blog.countDocuments(findQuery)
+    .then(count=> 
+        res.status(200).json({ totalDocs: count })
+    )
+    .catch(err=>{
+        console.log(err.message);
+        return res.status(500).json({ "error": err.message});
+    }
+    )
+})
+
+server.post("/search-blogs", (req, res) => {
+
+    let { tag, page } = req.body;
+    let findQuery = { tags: tag, draft: false };
+
+    let maxLimit = 5;
+
+    Blog.find(findQuery)
+    .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
+    .sort({ "activity.total_reads": -1, "activity.total_likes": -1, "publishedAt" : -1})
+    .select("blog_id title des banner activity tags publishedAt -_id")
+    .skip((page - 1) * maxLimit)
+    .limit(maxLimit)
+    .then(blogs =>
+        res.status(200).json({blogs})
+    )
+    .catch(err =>
+        res.status(500).json({"error": err.message})
+    )
+
 })
 
 server.post("/create-blog", verifyJWT,(req, res) => {
@@ -322,11 +378,14 @@ server.post("/create-blog", verifyJWT,(req, res) => {
 })
 
 server.get("/trending-blogs", (req, res) => {
+
+    let maxLimit = 5;
+
     Blog.find({ draft: false })
     .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")
     .sort({ "activity.total_reads": -1, "activity.total_likes": -1, "publishedAt" : -1})
     .select("blog_id title publishedAt -_id")
-    .limit(5)
+    .limit(maxLimit)
     .then(blogs =>
         res.status(200).json({blogs})
     )

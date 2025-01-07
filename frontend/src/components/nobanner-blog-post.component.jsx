@@ -7,7 +7,7 @@ const MinimalBlogPost = ( { blog, index }) => {
 
     return (
         <Link to={`/blog/${id}`} className="flex gap-5 mb-8">
-            <h1 className="text-4xl sm:text-3xl lg:text-5xl font-bold text-grey leading-none">{index < 10 ? "0" + (index + 1) : index + 1}</h1>
+            <h1 className="text-4xl sm:text-3xl lg:text-5xl font-bold text-grey leading-none">{index < 9 ? "0" + (index + 1) : index + 1}</h1>
 
             <div>
                 {/* Username, profile_img, and date */}

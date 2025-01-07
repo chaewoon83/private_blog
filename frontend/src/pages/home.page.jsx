@@ -6,6 +6,9 @@ import Loader from "../components/loader.component"
 import BlogPostCard from "../components/blog-post.component";
 import MinimalBlogPost from "../components/nobanner-blog-post.component";
 import { activeTabRef } from "../components/inpage-navigation.component";
+import NoDataMessage from "../components/nodata.component";
+import { filterPaginationData } from "../common/filter-pagination-data";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 
 const HomePage = () => {
@@ -16,10 +19,17 @@ const HomePage = () => {
 
     let categories = ["programming", "anime", "ai", "cooking", "airport", "game", "tech", "Mario"];
 
-    const fetchLatestBlogs = () => {
-        axios.get(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs")
-            .then(({ data }) => {
-                setBlogs(data.blogs);
+    const fetchLatestBlogs = ({ page = 1 }) => {
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs", { page })
+            .then(async ({ data }) => {
+                let formatedData = await filterPaginationData({
+                    state: blogs,
+                    data: data.blogs,
+                    page: page,
+                    countRoute: "/all-latest-blogs-count"
+                });
+
+                setBlogs(formatedData);
             })
             .catch(err => console.log(err));
     }
@@ -28,7 +38,6 @@ const HomePage = () => {
         axios.get(import.meta.env.VITE_SERVER_DOMAIN + "/trending-blogs")
             .then(({ data }) => {
                 setTrendingBlogs(data.blogs);
-                console.log(data.blogs);
             })
             .catch(err => console.log(err));
     }
@@ -38,22 +47,42 @@ const HomePage = () => {
 
         setBlogs(null);
 
-        if(pageState == category){
+        if (pageState == category) {
             setPageState("home");
             return;
         }
         setPageState(category);
     }
 
+    const fetchBlogsByCategory = ({ page = 1}) => {
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", { tag: pageState, page })
+            .then(async ({ data }) => {
+
+                let formatedData = await filterPaginationData({
+                    state: blogs,
+                    data: data.blogs,
+                    page: page,
+                    countRoute: "/all-search-blogs-count",
+                    data_to_send: { tag: pageState }
+                });
+
+                setBlogs(formatedData);
+
+            })
+            .catch(err => console.log(err));
+    }
+
     useEffect(() => {
 
         activeTabRef.current.click();
 
-        if(pageState == "home"){
-            fetchLatestBlogs();
+        if (pageState == "home") {
+            fetchLatestBlogs({ page: 1 });
         }
-        if(!trendingBlogs)
-        {
+        else {
+            fetchBlogsByCategory({ page: 1 });
+        }
+        if (!trendingBlogs) {
             fetchTrendingBlogs();
         }
 
@@ -71,29 +100,35 @@ const HomePage = () => {
                         <>
                             {
                                 blogs == null ? <Loader />
-                                    : blogs.map((blog, i) => {
-                                        return (
-                                            <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
-                                                <BlogPostCard content={blog} author={blog.author.personal_info} />
-                                            </AnimationWrapper>
-                                        )
+                                    : (blogs.results.length ?
+                                        blogs.results.map((blog, i) => {
+                                            return (
+                                                <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
+                                                    <BlogPostCard content={blog} author={blog.author.personal_info} />
+                                                </AnimationWrapper>
+                                            )
 
-                                    })
+                                        })
+                                        : <NoDataMessage message="No blogs published" />)
                             }
+
+                            <LoadMoreDataBtn state={blogs} fetchDataFunction={ (pageState == "home" ? fetchLatestBlogs : fetchBlogsByCategory)} />
                         </>
 
                         <>
 
                             {
                                 trendingBlogs == null ? <Loader />
-                                    : trendingBlogs.map((blog, i) => {
-                                        return (
-                                            <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
-                                                <MinimalBlogPost blog={blog} index={i} />
-                                            </AnimationWrapper>
-                                        )
+                                    : (trendingBlogs.length ?
+                                        trendingBlogs.map((blog, i) => {
+                                            return (
+                                                <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
+                                                    <MinimalBlogPost blog={blog} index={i} />
+                                                </AnimationWrapper>
+                                            )
 
-                                    })
+                                        })
+                                        : <NoDataMessage message="No blogs published" />)
                             }
                         </>
 
@@ -106,7 +141,7 @@ const HomePage = () => {
 
                         <div>
                             {/* categorizing*/}
-                            <h1 className="fond-medium text-xl mb-8"> 
+                            <h1 className="fond-medium text-xl mb-8">
                                 Sotries from all interests
                             </h1>
 
@@ -114,7 +149,7 @@ const HomePage = () => {
                                 {
                                     categories.map((category, i) => {
                                         return <button onClick={loadBlogByCategory}
-                                        className={"tag " + (pageState == category.toLowerCase() ? "bg-black text-white" : "")} key={i}>
+                                            className={"tag " + (pageState == category.toLowerCase() ? "bg-black text-white" : "")} key={i}>
                                             {category}
                                         </button>
                                     })
@@ -130,14 +165,16 @@ const HomePage = () => {
                             {/* blog title description*/}
                             {
                                 trendingBlogs == null ? <Loader />
-                                    : trendingBlogs.map((blog, i) => {
-                                        return (
-                                            <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
-                                                <MinimalBlogPost blog={blog} index={i} />
-                                            </AnimationWrapper>
-                                        )
+                                    : (trendingBlogs.length ?
+                                        trendingBlogs.map((blog, i) => {
+                                            return (
+                                                <AnimationWrapper transition={{ duration: 1, delay: i * 0.1 }} key={i}>
+                                                    <MinimalBlogPost blog={blog} index={i} />
+                                                </AnimationWrapper>
+                                            )
 
-                                    })
+                                        })
+                                        : <NoDataMessage message="No blogs published" />)
                             }
                         </div>
                     </div>
