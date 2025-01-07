@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useRef, useContext, useEffect } from "react";
+import { useRef, useContext, useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import EditorJS from "@editorjs/editorjs";
 import axios from "axios";
@@ -14,21 +14,20 @@ import { UserContext } from "../App";
 
 const BlogEditor = () => {
 
-    let { blog, blog: { title, banner, content, tags, des }, setBlog, textEditor, setTextEditor, setEditorState } = useContext(EditorContext);
+    let { blog, blog: { title, banner, content, tags, des }, setBlog, textEditor, setTextEditor, setEditorState, bannerURL, setBannerURL} = useContext(EditorContext);
 
     let {userAuth: { access_token }} = useContext(UserContext);
 
     let navigate = useNavigate();
    
     useEffect(()=> {
-        if(!textEditor.isReady){
-            setTextEditor(new EditorJS({
-                holderId: "textEditor",
-                data: content,
-                tools: tools,
-                placeholder: 'Text Editor',
-            }))
-        }
+        setTextEditor(new EditorJS({
+            holderId: "textEditor",
+            data: content,
+            tools: tools,
+            placeholder: 'Text Editor',
+            isReady: true
+        }))
     }, []);
 
     const handleTitleKeyDown = (e) => {
@@ -40,10 +39,8 @@ const BlogEditor = () => {
     const handleTitleChange = (e) => {
         let input = e.target;
 
-        console.log(input.scrollHeight);
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + "px";
-
         setBlog({ ...blog, title: input.value  });
     }
 
@@ -59,8 +56,9 @@ const BlogEditor = () => {
                 if(url){
                     toast.dismiss(loadingToast);
                     toast.success("Uploaded!");
-
-                    setBlog({...blog, banner: url});
+                    setBannerURL(url);
+                    console.log(url);
+                    //setBlog({...blog, banner: url});
                 }
             })
             .catch(err => {
@@ -78,7 +76,7 @@ const BlogEditor = () => {
 
     const handlePublishEvent = () => {
 
-        if(!banner.length){
+        if(!bannerURL.length){
             return toast.error("Upload a blog banner to publish");
         }
 
@@ -89,8 +87,8 @@ const BlogEditor = () => {
         if(textEditor.isReady){
             textEditor.save().then(data => {
                 if(data.blocks.length){
-                    console.log(data.blocks);
-                    setBlog({ ...blog, content: data });
+                    console.log(bannerURL);
+                    setBlog({ ...blog, banner: bannerURL, content: data });
                     setEditorState("publish");
                 }
                 else{
@@ -120,7 +118,7 @@ const BlogEditor = () => {
         e.target.classList.add('disable');
 
         let blogObj = {
-            title, banner, des, content, tags, draft: true
+            title, bannerURL, des, content, tags, draft: true
         }
 
         if(textEditor.isReady){
@@ -178,7 +176,7 @@ const BlogEditor = () => {
                         <div className="aspect-video hover:opacity-60 bg-white border-4 border-grey">
                             <label htmlFor="uploadBanner">
                                 <img 
-                                    src={banner}
+                                    src={bannerURL ? bannerURL : banner}
                                     className="z-20"
                                     onError={handleError}
                                 />

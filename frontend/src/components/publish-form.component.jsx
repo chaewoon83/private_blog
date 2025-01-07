@@ -150,7 +150,7 @@ const PublishForm = () => {
                     <p className="text-dark-grey mb-2 mt-9"> Short description</p>
                     <textarea
                         maxLength={characterLimit}
-                        default={des}
+                        defaultValue={des}
                         className="h-40 resize-none leading-7 input-box pl-4"
                         onChange={handleBlogDesChange}
                         onKeyDown={handleTitleKeyDown}>
