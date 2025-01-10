@@ -276,9 +276,18 @@ server.post("/google-auth", async (req, res) => {
 })
 
 server.post("/all-search-blogs-count", (req, res) => {
-    let { tag } = req.body;
 
-    let findQuery = { tags: tag, draft: false };
+    let { tag, query } = req.body;
+    let findQuery;
+    //if seaching by tag set query
+    if(tag){
+        findQuery = { tags: tag, draft: false };
+    }
+    //if seaching by query set query
+    else if (query){
+        findQuery = { draft: false, title: new RegExp(query, 'i')};
+    }
+
 
     Blog.countDocuments(findQuery)
     .then(count=> 
@@ -293,8 +302,17 @@ server.post("/all-search-blogs-count", (req, res) => {
 
 server.post("/search-blogs", (req, res) => {
 
-    let { tag, page } = req.body;
-    let findQuery = { tags: tag, draft: false };
+    let { tag, query, page } = req.body;
+    let findQuery;
+    //if seaching by tag set query
+    if(tag){
+        findQuery = { tags: tag, draft: false };
+    }
+    //if seaching by query set query
+    else if (query){
+        findQuery = { draft: false, title: new RegExp(query, 'i')};
+    }
+
 
     let maxLimit = 5;
 
@@ -311,6 +329,21 @@ server.post("/search-blogs", (req, res) => {
         res.status(500).json({"error": err.message})
     )
 
+})
+
+server.post("/search-users", (req, res)=> {
+    let { query } = req.body;
+    let maxLimit = 50;
+
+    User.find({ "personal_info.username": new RegExp(query, 'i') })
+    .limit(maxLimit)
+    .select("personal_info.fullname personal_info.username personal_info.profile_img -_id")
+    .then(users=>
+        res.status(200).json({users})
+    )
+    .catch(err=>
+        res.status(500).json({"error": err.message})
+    )
 })
 
 server.post("/create-blog", verifyJWT,(req, res) => {

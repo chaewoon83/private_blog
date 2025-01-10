@@ -1,5 +1,5 @@
 import {useContext, useState} from "react";
-import {Link, Outlet} from "react-router-dom";
+import {Link, Outlet, useNavigate} from "react-router-dom";
 import logo from "../imgs/logo.png";
 import React from "react";
 import { UserContext } from "../App.jsx";
@@ -13,6 +13,8 @@ const Navbar = () => {
 
     const { userAuth, userAuth: {access_token, profile_img} } = useContext(UserContext);
 
+    let Navigate = useNavigate();
+
     const handleUserNavPanel = () => {
         setUserNavPanel(curval=> !curval);
     }
@@ -22,6 +24,15 @@ const Navbar = () => {
             setUserNavPanel(false);
         }, 200);
 
+    }
+
+    const handleSearch = (e) => {
+        let query = e.target.value;
+
+        // press enter and something exist in searchbar
+        if(e.keyCode == 13 && query.length){
+            Navigate(`/search/${query}`);
+        }
     }
 
     return (
@@ -39,7 +50,9 @@ const Navbar = () => {
                     <input 
                     type="text"
                     placeholder="Search"
-                    className="w-full md:w-auto bg-grey p-4 pl-6 pr-[12%] md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12"/>
+                    className="w-full md:w-auto bg-grey p-4 pl-6 pr-[12%] md:pr-6 rounded-full placeholder:text-dark-grey md:pl-12"
+                    onKeyDown={handleSearch}
+                    />
 
                     <i className="fi fi-rr-search absolute right-[10%] md:pointer-events-none md:left-5 top-1/2 
                                 -translate-y-1/2 text-xl text-dark-grey" />
