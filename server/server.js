@@ -302,7 +302,7 @@ server.post("/all-search-blogs-count", (req, res) => {
 
 server.post("/search-blogs", (req, res) => {
 
-    let { tag, query, page } = req.body;
+    let { tag, query, page, author } = req.body;
     let findQuery;
     //if seaching by tag set query
     if(tag){
@@ -312,9 +312,12 @@ server.post("/search-blogs", (req, res) => {
     else if (query){
         findQuery = { draft: false, title: new RegExp(query, 'i')};
     }
+    else if (author) {
+        findQuery = { author, draft: false};
+    }
 
 
-    let maxLimit = 5;
+    let maxLimit = 2;
 
     Blog.find(findQuery)
     .populate("author", "personal_info.profile_img personal_info.username personal_info.fullname -_id")

@@ -47,7 +47,6 @@ const InPageNavigation = ({ routes, defaultHidden = [], defaultActiveIndex = 0, 
             </div>
 
             {/* children of buttons (blogs) */}
-
             { Array.isArray(children) ? children[inPageNavIndex] : children }
         </>
     )
