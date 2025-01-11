@@ -41,7 +41,7 @@ const ProfilePage = () => {
     let [profileLoaded, setProfileLoaded] = useState("");
 
     let { personal_info: { fullname, username: profile_username, profile_img, bio }, account_info: { total_posts, total_reads }, social_links, joinedAt } = profile;
-
+    console.log(profile);
     let { userAuth: { username } } = useContext(UserContext);
 
     const fetchUserProfile = () => {
