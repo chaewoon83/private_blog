@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useRef, useContext, useEffect, useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
 import EditorJS from "@editorjs/editorjs";
@@ -14,24 +14,27 @@ import { UserContext } from "../App";
 
 const BlogEditor = () => {
 
-    let { blog, blog: { title, banner, content, tags, des }, setBlog, textEditor, setTextEditor, setEditorState, bannerURL, setBannerURL} = useContext(EditorContext);
+    let { blog, blog: { title, banner, content, tags, des }, setBlog, textEditor, setTextEditor, setEditorState, bannerURL, setBannerURL } = useContext(EditorContext);
 
-    let {userAuth: { access_token }} = useContext(UserContext);
+    let { userAuth: { access_token } } = useContext(UserContext);
+
+    let { blog_id } = useParams();
 
     let navigate = useNavigate();
-   
-    useEffect(()=> {
+
+    useEffect(() => {
         setTextEditor(new EditorJS({
             holderId: "textEditor",
-            data: content,
+            data: Array.isArray(content) ? content[0] : content,
             tools: tools,
             placeholder: 'Text Editor',
             isReady: true
         }))
+
     }, []);
 
     const handleTitleKeyDown = (e) => {
-        if(e.keyCode == 13){
+        if (e.keyCode == 13) {
             e.preventDefault();
         }
     }
@@ -41,75 +44,74 @@ const BlogEditor = () => {
 
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + "px";
-        setBlog({ ...blog, title: input.value  });
+        setBlog({ ...blog, title: input.value });
     }
 
 
     const handleBannerUpload = (e) => {
         let img = e.target.files[0];
-        if(img){
+        if (img) {
 
             let loadingToast = toast.loading("Uploading...");
 
             uploadImage(img)
-            .then((url)=>{
-                if(url){
+                .then((url) => {
+                    if (url) {
+                        toast.dismiss(loadingToast);
+                        toast.success("Uploaded!");
+                        setBannerURL(url);
+                        console.log(url);
+                        //setBlog({...blog, banner: url});
+                    }
+                })
+                .catch(err => {
                     toast.dismiss(loadingToast);
-                    toast.success("Uploaded!");
-                    setBannerURL(url);
-                    console.log(url);
-                    //setBlog({...blog, banner: url});
-                }
-            })
-            .catch(err => {
-                toast.dismiss(loadingToast);
-                return toast.error(err);
-            });
+                    return toast.error(err);
+                });
         }
     }
 
     const handleError = (e) => {
-        let img= e.target;
+        let img = e.target;
 
         img.src = defaultBanner;
     }
 
     const handlePublishEvent = () => {
 
-        if(!bannerURL.length){
+        if (!bannerURL.length) {
             return toast.error("Upload a blog banner to publish");
         }
 
-        if(!title.length){
+        if (!title.length) {
             return toast.error("Write blog title to publish");
         }
 
-        if(textEditor.isReady){
+        if (textEditor.isReady) {
             textEditor.save().then(data => {
-                if(data.blocks.length){
-                    console.log(bannerURL);
+                if (data.blocks.length) {
                     setBlog({ ...blog, banner: bannerURL, content: data });
                     setEditorState("publish");
                 }
-                else{
+                else {
                     return toast.error("Write something in blog to publish");
                 }
             })
-            .catch((err)=> {
-                console.log(err);
-            })
+                .catch((err) => {
+                    console.log(err);
+                })
 
         }
     }
 
     const handleSaveDraft = (e) => {
         //prevent mulitple submission
-        if(e.target.className.includes("disable")){
+        if (e.target.className.includes("disable")) {
             return;
         }
 
         //check valid inputs
-        if(!title.length){
+        if (!title.length) {
             return toast.error("Write blog title before saving it as a draft");
         }
 
@@ -121,41 +123,41 @@ const BlogEditor = () => {
             title, bannerURL, des, content, tags, draft: true
         }
 
-        if(textEditor.isReady){
-            textEditor.save().then( content => {
-                axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
+        if (textEditor.isReady) {
+            textEditor.save().then(content => {
+                axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", { ...blogObj, id: blog_id }, {
                     headers: {
                         'Authorization': `Bearer ${access_token}`
                     }
                 })
-                .then(()=> {
-        
-                    e.target.classList.remove('disable');
-                    toast.dismiss(loadingToast);
-                    toast.success("Saved");
-        
-                    //navigate user to homepage
-                    setTimeout(()=> {
-                        navigate("/");
-                    }, 500)
-                })
-                .catch(({ response }) => {
-                    e.target.classList.remove('disable');
-                    toast.dismiss(loadingToast);
-                    return toast.error(response.data.error);
-                })
+                    .then(() => {
+
+                        e.target.classList.remove('disable');
+                        toast.dismiss(loadingToast);
+                        toast.success("Saved");
+
+                        //navigate user to homepage
+                        setTimeout(() => {
+                            navigate("/");
+                        }, 500)
+                    })
+                    .catch(({ response }) => {
+                        e.target.classList.remove('disable');
+                        toast.dismiss(loadingToast);
+                        return toast.error(response.data.error);
+                    })
             })
         }
     }
-    
-    return(
+
+    return (
         <>
             <nav className="navbar">
                 <Link to="/" className="flex-none w-10">
                     <img src={logo} />
                 </Link>
                 <p className="max-md:hidden text-black line-clamp-1 w-full text-ellipsis">
-                    { title.length ? title : "New Blog" }
+                    {title.length ? title : "New Blog"}
                 </p>
                 <div className="flex gap-4 ml-auto">
                     <button className="btn-dark py-2"
@@ -175,7 +177,7 @@ const BlogEditor = () => {
 
                         <div className="aspect-video hover:opacity-60 bg-white border-4 border-grey">
                             <label htmlFor="uploadBanner">
-                                <img 
+                                <img
                                     src={bannerURL ? bannerURL : banner}
                                     className="z-20"
                                     onError={handleError}

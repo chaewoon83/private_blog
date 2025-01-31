@@ -1,17 +1,63 @@
-import { useContext } from "react";
+import axios from "axios";
+import { useContext, useEffect } from "react";
 import { BlogContext } from "../pages/blog.page";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
+import { Toaster, toast } from "react-hot-toast";
 
-const BlogInteraction = ({ blog }) => {
+const BlogInteraction = ({}) => {
 
-    let { blog: { title, blog_id, activity, activity: { total_likes, total_comments }, author: { personal_info: { username: author_username } } }, setBlog } = useContext(BlogContext);
+    let { blog, blog: {_id, title, blog_id, activity, activity: { total_likes, total_comments }, author: { personal_info: { username: author_username } } }, setBlog, isLikedByUser, setLikedByUser} = useContext(BlogContext);
 
-    let { userAuth: { username } } = useContext(UserContext);
+    let { userAuth: { username, access_token } } = useContext(UserContext);
+
+    useEffect(() => {
+        if(access_token){
+            // make request to server to get like information
+            axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/isliked-by-user", { _id },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`
+                    }
+            })
+            .then(({data: {result}}) => {
+                console.log(result);
+                setLikedByUser(Boolean(result));
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        }
+    }, [])
     
+    const handleLike = () => {
+        // like the blog
+        if(access_token){
+            setLikedByUser(preVal => !preVal);
+            isLikedByUser ? total_likes-- : total_likes++;
+            //update blog to update total_likes
+            setBlog({...blog, activity: {...activity, total_likes}});
+
+            axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/like-blog", {_id, isLikedByUser}, {
+                headers: {
+                    'Authorization': `Bearer ${access_token}`
+                }
+            })
+            .then( ({data}) => {
+                console.log(data);
+            })
+            .catch(err=>{
+                console.log(err);
+            })
+        }
+        else{
+            toast.error("please log in to like this blog");
+        }
+    }
     console.log(username);
     return (
         <>
+            <Toaster />
             {/* put interactions between hrs(lines) */}
             <hr className="border-grey my-2"></hr>
             {/* interaction buttons (justify-between : put children left and right end ) */}
@@ -20,8 +66,8 @@ const BlogInteraction = ({ blog }) => {
                 <div className="flex gap-3 items-center">
 
                     {/* like button */}
-                    <button className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
-                        <i className="fi fi-rr-heart" />
+                    <button className={"w-10 h-10 rounded-full flex items-center justify-center " + (isLikedByUser ? "bg-red/20 text-red" : "bg-grey/80" ) } onClick={handleLike}>
+                        <i className= {(isLikedByUser ? "fi fi-sr-heart" : "fi fi-rr-heart" )} />
                     </button>
                     <p className="text-xl text-dark-grey">{total_likes}</p>
 
