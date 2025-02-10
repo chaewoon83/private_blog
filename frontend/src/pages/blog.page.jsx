@@ -7,6 +7,8 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
+import CommentsContainer from "../components/comments.component";
+
 
 export const BlogContext = createContext({});
 
@@ -26,6 +28,9 @@ const BlogPage = () => {
     const [loading, setLoading] = useState(true);
     const [ similarBlogs, setSimilarBlogs ] = useState(null);
     const [ isLikedByUser, setLikedByUser ] = useState(false);
+    const [commentsWrapper, setCommentsWrapper] = useState(false);
+    //total parent commnets (replies are not counted as parent)
+    const [totalParentCommentsLoaded, settotalParentCommentsLoaded] = useState(0);
 
     let limitSimilarBlog =6;
 
@@ -56,6 +61,9 @@ const BlogPage = () => {
         setLoading(true);
         setBlog(blogStructure);
         setSimilarBlogs(null);
+        setLikedByUser(false);
+        //setCommentsWrapper(false);
+        settotalParentCommentsLoaded(0);
     }
 
     return (
@@ -64,8 +72,10 @@ const BlogPage = () => {
                 //render loader when loading is true
                 loading ? <Loader /> :
 
-                    <BlogContext.Provider value={{blog, setBlog, isLikedByUser, setLikedByUser}}>
-                {/* basic div component */}
+                    <BlogContext.Provider value={{blog, setBlog, isLikedByUser, setLikedByUser, commentsWrapper, setCommentsWrapper, totalParentCommentsLoaded, settotalParentCommentsLoaded}}>
+                        {/* container for comments */}
+                        <CommentsContainer />
+                        {/* basic div component */}
                         <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
                             {/* banner image */}
                             <img src={banner} className="aspect-video" />
