@@ -13,7 +13,7 @@ const CommentCard = ({index, leftVal, commentData}) => {
                 <div className="flex gap-3 items-center mb-8">
                     <img src = {profile_img} className="w-6 h-6 rounded-full"></img>
 
-                    <p className=""line-clamp-1>{fullname} @{username}</p>
+                    <p className="line-clamp-1">{fullname} @{username}</p>
                     <p className="min-w-fit">{getDay(commentedAt)}</p>
                 </div>
 

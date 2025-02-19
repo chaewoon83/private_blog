@@ -30,7 +30,7 @@ const BlogPage = () => {
     const [ isLikedByUser, setLikedByUser ] = useState(false);
     const [commentsWrapper, setCommentsWrapper] = useState(false);
     //total parent commnets (replies are not counted as parent)
-    const [totalParentCommentsLoaded, settotalParentCommentsLoaded] = useState(0);
+    const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0);
 
     let limitSimilarBlog =6;
 
@@ -41,7 +41,7 @@ const BlogPage = () => {
         axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
             .then(async ({ data: { blog } }) => {
                 
-                blog.comments = await fetchComments({ blog_id: blog._id, setParentCommentCountFun: settotalParentCommentsLoaded})
+                blog.comments = await fetchComments({ blog_id: blog._id, setParentCommentCountFun: setTotalParentCommentsLoaded})
                 
                 await axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", { tag: blog.tags[0], limit: limitSimilarBlog, eliminate_blog: blog_id })
                 .then(({ data }) => {
@@ -68,7 +68,7 @@ const BlogPage = () => {
         setSimilarBlogs(null);
         setLikedByUser(false);
         //setCommentsWrapper(false);
-        settotalParentCommentsLoaded(0);
+        setTotalParentCommentsLoaded(0);
     }
 
     return (
@@ -77,7 +77,7 @@ const BlogPage = () => {
                 //render loader when loading is true
                 loading ? <Loader /> :
 
-                    <BlogContext.Provider value={{blog, setBlog, isLikedByUser, setLikedByUser, commentsWrapper, setCommentsWrapper, totalParentCommentsLoaded, settotalParentCommentsLoaded}}>
+                    <BlogContext.Provider value={{blog, setBlog, isLikedByUser, setLikedByUser, commentsWrapper, setCommentsWrapper, totalParentCommentsLoaded, setTotalParentCommentsLoaded: setTotalParentCommentsLoaded}}>
                         {/* container for comments */}
                         <CommentsContainer />
                         {/* basic div component */}
