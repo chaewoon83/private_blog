@@ -43,7 +43,6 @@ const BlogPage = () => {
                 
                 blog.comments = await fetchComments({ blog_id: blog._id, setParentCommentCountFun: settotalParentCommentsLoaded})
                 
-                console.log(blog)
                 await axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", { tag: blog.tags[0], limit: limitSimilarBlog, eliminate_blog: blog_id })
                 .then(({ data }) => {
                     setSimilarBlogs(data.blogs);
