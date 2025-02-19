@@ -7,7 +7,7 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
-import CommentsContainer from "../components/comments.component";
+import CommentsContainer, { fetchComments } from "../components/comments.component";
 
 
 export const BlogContext = createContext({});
@@ -35,14 +35,21 @@ const BlogPage = () => {
     let limitSimilarBlog =6;
 
     let { title, content, banner, author: { personal_info: { fullname, username: author_username, profile_img } }, publishedAt } = blog;
+
     const fetchBlog = () => {
+
         axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
             .then(async ({ data: { blog } }) => {
-                console.log(blog.content);
+
+                blog.comments = await fetchComments({ blog_id: blog._id, setParentCommentCountFun: settotalParentCommentsLoaded})
+
+                
+
                 await axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", { tag: blog.tags[0], limit: limitSimilarBlog, eliminate_blog: blog_id })
                 .then(({ data }) => {
                     setSimilarBlogs(data.blogs);
                 })
+                
                 setBlog(blog);
                 setLoading(false);
             })

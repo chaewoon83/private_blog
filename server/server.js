@@ -563,7 +563,29 @@ server.post("/add-comment", verifyJWT, (req,res)=> {
         return res.status(200).json({
             comment, commentedAt, _id: commentFile._id, user_id, children
         })
+    })
+})
 
+server.post("/get-blog-commnets", (req, res) => {
+
+    let {blog_id, skip} = req.body;
+
+    let maxLimit = 5;
+
+    Comment.find({ blog_id, isReply:false })
+    .sort({
+        'commentedAt' : -1
+        //get latest comment first
+    })
+    .populate("commented_by", "personal_info.username personal_info.fullname personal_info.profile_img")
+    .skip(skip)
+    .limit(maxLimit)
+    .then(comment => {
+        return res.status(200).json(comment);
+    })
+    .catch(err => {
+        console.log(err.message);
+        return res.status(500).json({ error: err.message});
     })
 
 })
