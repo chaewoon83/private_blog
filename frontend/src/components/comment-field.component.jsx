@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { BlogContext} from "../pages/blog.page";
 //action => comment or reply
-const CommentField = ({ action }) => {
+//use SetReplying to hide commentfield
+const CommentField = ({ action, index = undefined, replyingTo=undefined, setReplying }) => {
 
     let { blog, blog: {_id, author: {_id: blog_author}, comments, comments: { results: commentsArr}, activity, activity: {total_comments, total_parent_comments}}, setBlog, setTotalParentCommentsLoaded} = useContext(BlogContext);
     let { userAuth: { access_token, username, fullname, profile_img } } = useContext(UserContext);
@@ -21,11 +22,12 @@ const CommentField = ({ action }) => {
             return toast.error("Write something to leave a comment"); 
         }
 
-        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/add-comment", { _id, blog_author, comment}, {
+        axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/add-comment", { _id, blog_author, comment, replyingTo: replyingTo}, {
             headers: {
                 'Authorization': `Bearer ${access_token}`
             }
         })
+
         .then(({data}) => {
             //render comment component card
             setComment("");
